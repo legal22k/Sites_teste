@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turma Connect</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+
+    /* ============================================  LIGHT  */
+    :root, [data-theme="light"] {
+      --accent:        #4f46e5;
+      --accent-dark:   #3730a3;
+      --accent-glow:   rgba(79,70,229,.18);
+      --accent-soft:   #ede9fe;
+      --green:         #059669;
+      --green-dark:    #047857;
+      --pink:          #e11d48;
+      --pink-soft:     #fce7f3;
+      --bg:            #f1f0fb;
+      --card:          #ffffff;
+      --card-inner:    #f8f7ff;
+      --modal-bg:      #ffffff;
+      --modal-overlay: rgba(30,27,75,.55);
+      --text:          #1e1b4b;
+      --text-2:        #374151;
+      --muted:         #6b7280;
+      --border:        #e5e7eb;
+      --input-bg:      #fafafa;
+      --input-focus:   #ffffff;
+      --header-bg:     #4f46e5;
+      --header-shadow: rgba(79,70,229,.25);
+      --toast-bg:      #1e1b4b;
+      --tag-bg:        #ede9fe;
+      --tag-color:     #4f46e5;
+      --comment-bg:    #f5f3ff;
+      --comment-border:#4f46e5;
+      --switch-track:  #c7d2fe;
+      --switch-thumb:  #4f46e5;
+    }
+
+    /* ============================================  DARK  */
+    [data-theme="dark"] {
+      --accent:        #a78bfa;
+      --accent-dark:   #7c3aed;
+      --accent-glow:   rgba(167,139,250,.18);
+      --accent-soft:   rgba(167,139,250,.15);
+      --green:         #34d399;
+      --green-dark:    #10b981;
+      --pink:          #fb7185;
+      --pink-soft:     rgba(251,113,133,.15);
+      --bg:            #0f0a1e;
+      --card:          #1a1035;
+      --card-inner:    #130c28;
+      --modal-bg:      #1a1035;
+      --modal-overlay: rgba(5,2,15,.72);
+      --text:          #ede9fe;
+      --text-2:        #c4b5fd;
+      --muted:         #7c6fa0;
+      --border:        #2e1f5e;
+      --input-bg:      #130c28;
+      --input-focus:   #1e1245;
+      --header-bg:     #120a2a;
+      --header-shadow: rgba(167,139,250,.15);
+      --toast-bg:      #2e1f5e;
+      --tag-bg:        rgba(167,139,250,.18);
+      --tag-color:     #c4b5fd;
+      --comment-bg:    #1e1245;
+      --comment-border:#7c3aed;
+      --switch-track:  #3b1f7a;
+      --switch-thumb:  #a78bfa;
+    }
+
+    /* ============================================  BASE  */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--text);
+      transition: background .4s, color .4s;
+    }
+    h1,h2,h3 { font-family: 'Syne', sans-serif; }
+
+    /* ============================================  THEME FLASH OVERLAY  */
+    #themeFlash {
+      position: fixed; inset: 0; z-index: 9999;
+      pointer-events: none; opacity: 0;
+    }
+    #themeFlash.flash-light {
+      background: radial-gradient(circle at center, #fff 0%, rgba(255,255,255,0) 70%);
+      animation: flashBurst .55s ease-out forwards;
+    }
+    #themeFlash.flash-dark {
+      background: radial-gradient(circle at center, #1a0533 0%, rgba(10,5,30,0) 70%);
+      animation: flashBurst .55s ease-out forwards;
+    }
+    @keyframes flashBurst {
+      0%   { opacity: 0; transform: scale(.6); }
+      25%  { opacity: .85; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.6); }
+    }
+
+    /* ============================================  TOGGLE BUTTON  */
+    .theme-toggle-btn {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.1);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.05rem;
+      transition: background .25s, border-color .25s, transform .2s;
+      position: relative; overflow: hidden;
+      flex-shrink: 0;
+    }
+    .theme-toggle-btn:hover {
+      background: rgba(255,255,255,.22);
+      transform: scale(1.08);
+    }
+    .theme-toggle-btn:active { transform: scale(.93); }
+
+    /* icon spin animation */
+    .theme-toggle-btn .ti-icon {
+      position: absolute;
+      transition: opacity .3s, transform .4s;
+    }
+    .ti-sun  { opacity: 0; transform: rotate(-90deg) scale(.5); }
+    .ti-moon { opacity: 1; transform: rotate(0deg) scale(1); }
+    [data-theme="dark"] .ti-sun  { opacity: 1; transform: rotate(0deg) scale(1); }
+    [data-theme="dark"] .ti-moon { opacity: 0; transform: rotate(90deg) scale(.5); }
+
+    /* ============================================  HEADER  */
+    header {
+      background: var(--header-bg);
+      box-shadow: 0 4px 24px var(--header-shadow);
+      position: sticky; top: 0; z-index: 100;
+      transition: background .4s, box-shadow .4s;
+    }
+
+    /* ============================================  MODALS (shared)  */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: var(--modal-overlay);
+      backdrop-filter: blur(7px);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--modal-bg);
+      border-radius: 22px;
+      width: 100%; max-width: 460px;
+      padding: 2rem;
+      box-shadow: 0 25px 60px var(--accent-glow);
+      transform: translateY(22px) scale(.97);
+      transition: transform .32s cubic-bezier(.34,1.56,.64,1), background .4s;
+      border: 1px solid var(--border);
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0) scale(1); }
+
+    /* tabs */
+    .tab-btn {
+      flex: 1; padding: .6rem 0;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem;
+      border-radius: 12px; border: none; cursor: pointer;
+      transition: background .2s, color .2s;
+      background: transparent; color: var(--muted);
+    }
+    .tab-btn.active { background: var(--accent); color: #fff; }
+
+    /* ============================================  INPUTS  */
+    .field {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: .75rem 1rem;
+      font-family: 'DM Sans', sans-serif; font-size: .95rem;
+      outline: none;
+      background: var(--input-bg);
+      color: var(--text);
+      transition: border-color .2s, box-shadow .2s, background .4s, color .4s;
+    }
+    .field::placeholder { color: var(--muted); }
+    .field:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+      background: var(--input-focus);
+    }
+
+    /* ============================================  BUTTONS  */
+    .btn-primary {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 12px; padding: .75rem 1.5rem;
+      font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer;
+      transition: background .2s, transform .1s, box-shadow .2s;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .btn-primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-green {
+      background: var(--green); color: #fff; border: none;
+      border-radius: 12px; padding: .75rem 1.5rem;
+      font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer;
+      transition: background .2s, transform .1s;
+    }
+    .btn-green:hover { background: var(--green-dark); transform: translateY(-1px); }
+
+    .btn-ghost {
+      background: var(--accent-soft); color: var(--accent); border: none;
+      border-radius: 10px; padding: .5rem 1rem;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: .85rem;
+      cursor: pointer; transition: background .2s;
+    }
+    .btn-ghost:hover { filter: brightness(.93); }
+
+    /* ============================================  CARDS  */
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      box-shadow: 0 2px 16px var(--accent-glow);
+      overflow: hidden;
+      transition: box-shadow .2s, background .4s;
+      border: 1px solid var(--border);
+    }
+    .card:hover { box-shadow: 0 6px 30px var(--accent-glow); }
+    [data-theme="dark"] .card { box-shadow: 0 2px 24px rgba(124,58,237,.12); }
+    [data-theme="dark"] .card:hover { box-shadow: 0 4px 40px rgba(167,139,250,.18); }
+
+    /* ============================================  LIKE BTN  */
+    .like-btn {
+      display: flex; align-items: center; gap: .4rem;
+      background: none; border: 1.5px solid var(--pink-soft);
+      border-radius: 999px; padding: .4rem .9rem;
+      font-family: 'Syne', sans-serif; font-weight: 700;
+      color: var(--pink); cursor: pointer;
+      transition: background .2s, color .2s, border-color .2s, transform .15s;
+    }
+    .like-btn:hover { background: var(--pink-soft); transform: scale(1.06); }
+    .like-btn.liked { background: var(--pink); color: #fff; border-color: var(--pink); }
+    .like-btn.liked:hover { filter: brightness(.9); }
+
+    /* ============================================  TOAST  */
+    #toast {
+      position: fixed; bottom: 2rem; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--toast-bg); color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 12px; padding: .7rem 1.4rem;
+      font-family: 'Syne', sans-serif; font-weight: 600; font-size: .88rem;
+      z-index: 999; transition: transform .3s, background .4s;
+      box-shadow: 0 8px 30px rgba(0,0,0,.25); white-space: nowrap;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ============================================  TAG BADGE  */
+    .tag-badge {
+      font-size: .72rem; background: var(--tag-bg); color: var(--tag-color);
+      border-radius: 999px; padding: .15rem .55rem; font-family: 'DM Sans', sans-serif;
+      transition: background .4s, color .4s;
+    }
+
+    /* ============================================  COMMENT ITEM  */
+    .comment-item {
+      background: var(--comment-bg); border-radius: 14px; padding: .9rem 1rem;
+      border-left: 3px solid var(--comment-border);
+      transition: background .4s;
+    }
+
+    /* ============================================  PROFILE MODAL  */
+    .avatar-upload-wrap {
+      position: relative; display: inline-block; cursor: pointer;
+    }
+    .avatar-upload-wrap img {
+      width: 96px; height: 96px; border-radius: 50%; object-fit: cover;
+      border: 3px solid var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+      transition: filter .2s;
+    }
+    .avatar-upload-wrap:hover img { filter: brightness(.75); }
+    .avatar-upload-overlay {
+      position: absolute; inset: 0; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,.38); opacity: 0; transition: opacity .2s;
+      color: white; font-size: .75rem; font-family: 'Syne',sans-serif; font-weight: 700;
+      flex-direction: column; gap: 2px;
+    }
+    .avatar-upload-wrap:hover .avatar-upload-overlay { opacity: 1; }
+
+    /* profile stats bar */
+    .profile-stat {
+      display: flex; flex-direction: column; align-items: center;
+      gap: .2rem;
+    }
+    .profile-stat strong {
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem;
+      color: var(--text);
+    }
+    .profile-stat span {
+      font-size: .75rem; color: var(--muted); font-family: 'DM Sans', sans-serif;
+    }
+
+    /* scrollbar dark */
+    [data-theme="dark"] ::-webkit-scrollbar { width: 6px; }
+    [data-theme="dark"] ::-webkit-scrollbar-track { background: var(--bg); }
+    [data-theme="dark"] ::-webkit-scrollbar-thumb { background: #3b1f7a; border-radius: 999px; }
+    [data-theme="dark"] header { border-bottom: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+<!-- ====== THEME FLASH ====== -->
+<div id="themeFlash"></div>
+
+<!-- ====== AUTH MODAL ====== -->
+<div id="authModal" class="modal-overlay">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.4rem">
+      <h2 style="font-size:1.35rem;font-weight:800;color:var(--text)">Turma Connect</h2>
+      <button onclick="closeAuthModal()" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--muted)"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div style="display:flex;gap:.5rem;background:var(--bg);border-radius:14px;padding:.35rem;margin-bottom:1.4rem;transition:background .4s">
+      <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Entrar</button>
+      <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Criar Conta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginPanel">
+      <div style="display:flex;flex-direction:column;gap:.85rem">
+        <input class="field" type="email" id="loginEmail" placeholder="Seu email"/>
+        <div style="position:relative">
+          <input class="field" type="password" id="loginPassword" placeholder="Sua senha" style="padding-right:2.8rem"/>
+          <button type="button" onclick="togglePass('loginPassword',this)" style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted)"><i class="fa-solid fa-eye"></i></button>
+        </div>
+        <button class="btn-green" style="width:100%;margin-top:.3rem" onclick="doLogin()"><i class="fa-solid fa-right-to-bracket" style="margin-right:.4rem"></i>Entrar</button>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerPanel" style="display:none">
+      <div style="display:flex;flex-direction:column;gap:.85rem">
+        <input class="field" type="text" id="registerUsername" placeholder="Nome de usuário"/>
+        <input class="field" type="email" id="registerEmail" placeholder="Seu email"/>
+        <div style="position:relative">
+          <input class="field" type="password" id="registerPassword" placeholder="Sua senha" style="padding-right:2.8rem"/>
+          <button type="button" onclick="togglePass('registerPassword',this)" style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted)"><i class="fa-solid fa-eye"></i></button>
+        </div>
+        <div style="position:relative">
+          <input class="field" type="password" id="registerConfirm" placeholder="Confirmar senha" style="padding-right:2.8rem"/>
+          <button type="button" onclick="togglePass('registerConfirm',this)" style="position:absolute;right:.9rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted)"><i class="fa-solid fa-eye"></i></button>
+        </div>
+        <button class="btn-primary" style="width:100%;margin-top:.3rem" onclick="doRegister()"><i class="fa-solid fa-user-plus" style="margin-right:.4rem"></i>Criar Conta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== PROFILE MODAL ====== -->
+<div id="profileModal" class="modal-overlay">
+  <div class="modal-box" style="max-width:500px">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h2 style="font-size:1.3rem;font-weight:800;color:var(--text)"><i class="fa-solid fa-user-circle" style="color:var(--accent);margin-right:.45rem"></i>Meu Perfil</h2>
+      <button onclick="closeProfileModal()" style="background:none;border:none;cursor:pointer;font-size:1.3rem;color:var(--muted)"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- AVATAR + STATS -->
+    <div style="display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--border)">
+      <div>
+        <label class="avatar-upload-wrap" title="Trocar foto">
+          <img id="profileAvatarPreview" src="" alt="Avatar"/>
+          <div class="avatar-upload-overlay">
+            <i class="fa-solid fa-camera" style="font-size:1.1rem"></i>
+            <span>Trocar</span>
+          </div>
+          <input type="file" id="profileAvatarInput" accept="image/*" style="display:none" onchange="previewAvatar(this)"/>
+        </label>
+      </div>
+      <div style="flex:1">
+        <div id="profileDisplayName" style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--text);margin-bottom:.3rem"></div>
+        <div id="profileDisplayTag" class="tag-badge" style="font-size:.8rem"></div>
+        <div style="display:flex;gap:1.2rem;margin-top:.75rem">
+          <div class="profile-stat"><strong id="statPosts">0</strong><span>posts</span></div>
+          <div class="profile-stat"><strong id="statLikes">0</strong><span>curtidas dadas</span></div>
+          <div class="profile-stat"><strong id="statComments">0</strong><span>comentários</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT FORM -->
+    <div style="display:flex;flex-direction:column;gap:.85rem">
+      <div>
+        <label style="font-size:.8rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.35rem;font-family:'Syne',sans-serif">NOME DE USUÁRIO</label>
+        <input class="field" type="text" id="editUsername" placeholder="Novo nome de usuário"/>
+      </div>
+      <div>
+        <label style="font-size:.8rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.35rem;font-family:'Syne',sans-serif">TAG PERSONALIZADA</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--accent);font-weight:700;font-family:'Syne',sans-serif">@</span>
+          <input class="field" type="text" id="editTag" placeholder="suatag" style="padding-left:2rem"/>
+        </div>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:.3rem">Somente letras minúsculas, números e _</p>
+      </div>
+      <div>
+        <label style="font-size:.8rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.35rem;font-family:'Syne',sans-serif">EMAIL</label>
+        <input class="field" type="email" id="editEmail" placeholder="Seu email"/>
+      </div>
+
+      <div style="display:flex;gap:.7rem;margin-top:.3rem">
+        <button class="btn-primary" style="flex:1" onclick="saveProfile()"><i class="fa-solid fa-floppy-disk" style="margin-right:.4rem"></i>Salvar</button>
+        <button class="btn-ghost" onclick="closeProfileModal()">Cancelar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== TOAST ====== -->
+<div id="toast"></div>
+
+<!-- ====== HEADER ====== -->
+<header>
+  <div style="max-width:860px;margin:0 auto;padding:.85rem 1.2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem">
+
+    <h1 style="font-size:1.35rem;font-weight:800;color:white;display:flex;align-items:center;gap:.5rem;flex-shrink:0">
+      <i class="fa-solid fa-users"></i> Turma Connect
+    </h1>
+
+    <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;justify-content:flex-end">
+
+      <!-- THEME TOGGLE -->
+      <button class="theme-toggle-btn" onclick="toggleTheme()" title="Alternar tema">
+        <i class="fa-solid fa-sun  ti-icon ti-sun"  style="color:#fde68a"></i>
+        <i class="fa-solid fa-moon ti-icon ti-moon" style="color:#c4b5fd"></i>
+      </button>
+
+      <div id="headerUserArea" style="display:flex;align-items:center;gap:.7rem"></div>
+    </div>
+
+  </div>
+</header>
+
+<!-- ====== MAIN ====== -->
+<main style="max-width:860px;margin:0 auto;padding:1.5rem 1rem 3rem">
+
+  <!-- CRIAR POST -->
+  <div class="card" style="padding:1.4rem;margin-bottom:1.4rem">
+    <h2 style="font-size:1.15rem;font-weight:800;margin-bottom:1rem;color:var(--text)">
+      <i class="fa-solid fa-pen-to-square" style="color:var(--accent);margin-right:.4rem"></i>Nova Publicação
+    </h2>
+    <div style="display:flex;flex-direction:column;gap:.85rem">
+      <input class="field" type="text" id="postTitle" placeholder="Título (opcional)"/>
+      <textarea class="field" id="postDesc" rows="3" placeholder="O que você quer compartilhar?" style="resize:vertical"></textarea>
+      <label style="display:flex;align-items:center;gap:.55rem;cursor:pointer;font-size:.88rem;color:var(--muted)">
+        <i class="fa-solid fa-image" style="color:var(--accent);font-size:1rem"></i>
+        <input type="file" id="postImage" accept="image/*" style="display:none" onchange="updateFileLabel(this)"/>
+        <span id="fileLabelText">Adicionar imagem</span>
+      </label>
+      <div><button class="btn-primary" onclick="doCreatePost()"><i class="fa-solid fa-paper-plane" style="margin-right:.35rem"></i>Publicar</button></div>
+    </div>
+  </div>
+
+  <!-- POSTS -->
+  <div id="postsContainer" style="display:flex;flex-direction:column;gap:1.2rem"></div>
+  <p id="emptyMsg" style="text-align:center;color:var(--muted);padding:3rem 0;font-size:1rem;display:none">
+    <i class="fa-solid fa-wind" style="font-size:2rem;display:block;margin-bottom:.7rem;opacity:.3"></i>
+    Nenhuma publicação ainda. Seja o primeiro!
+  </p>
+</main>
+
+<script>
+  // =============================================
+  // THEME
+  // =============================================
+  const savedTheme = localStorage.getItem('tc_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next    = current === 'dark' ? 'light' : 'dark';
+
+    // flash burst
+    const flash = document.getElementById('themeFlash');
+    flash.className = '';
+    void flash.offsetWidth; // reflow to restart animation
+    flash.className = next === 'light' ? 'flash-light' : 'flash-dark';
+
+    // slight delay so flash is visible before colors shift
+    setTimeout(() => {
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('tc_theme', next);
+      renderPosts();
+    }, 80);
+  }
+
+  // =============================================
+  // DATA
+  // =============================================
+  let users       = JSON.parse(localStorage.getItem('tc_users') || '[]');
+  let currentUser = null;
+  let posts       = [];
+
+  // =============================================
+  // TOAST
+  // =============================================
+  function toast(msg, ms = 2800) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), ms);
+  }
+
+  // =============================================
+  // AUTH MODAL
+  // =============================================
+  function openAuthModal(tab = 'login') {
+    switchTab(tab);
+    document.getElementById('authModal').classList.add('open');
+  }
+  function closeAuthModal() {
+    document.getElementById('authModal').classList.remove('open');
+    ['loginEmail','loginPassword','registerUsername','registerEmail','registerPassword','registerConfirm']
+      .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  }
+  document.getElementById('authModal').addEventListener('click', function(e) { if(e.target===this) closeAuthModal(); });
+
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('loginPanel').style.display    = isLogin ? '' : 'none';
+    document.getElementById('registerPanel').style.display = isLogin ? 'none' : '';
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  }
+  function togglePass(fieldId, btn) {
+    const f = document.getElementById(fieldId);
+    const i = btn.querySelector('i');
+    if (f.type==='password') { f.type='text'; i.className='fa-solid fa-eye-slash'; }
+    else                     { f.type='password'; i.className='fa-solid fa-eye'; }
+  }
+
+  // =============================================
+  // REGISTER
+  // =============================================
+  function doRegister() {
+    const username = document.getElementById('registerUsername').value.trim();
+    const email    = document.getElementById('registerEmail').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    const confirm  = document.getElementById('registerConfirm').value;
+    if (!username||!email||!password) { toast('⚠️ Preencha todos os campos.'); return; }
+    if (password!==confirm)           { toast('⚠️ As senhas não coincidem.'); return; }
+    if (password.length<6)            { toast('⚠️ Senha mínima de 6 caracteres.'); return; }
+    if (users.find(u=>u.email===email)){ toast('⚠️ Email já cadastrado.'); return; }
+    const tag = `@${username.toLowerCase().replace(/\s+/g,'_')}_${Date.now().toString().slice(-5)}`;
+    const newUser = { id:Date.now(), username, email, password, tag, avatar:'' };
+    users.push(newUser);
+    saveUsers();
+    toast(`✅ Conta criada! Tag: ${tag}`);
+    closeAuthModal();
+    loginAs(newUser);
+  }
+
+  // =============================================
+  // LOGIN
+  // =============================================
+  function doLogin() {
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const user     = users.find(u=>u.email===email&&u.password===password);
+    if (!user) { toast('❌ Email ou senha incorretos.'); return; }
+    closeAuthModal();
+    loginAs(user);
+  }
+  function loginAs(user) {
+    currentUser = user;
+    updateHeader();
+    toast(`👋 Bem-vindo, ${user.username}!`);
+    renderPosts();
+  }
+  function doLogout() {
+    currentUser = null;
+    updateHeader();
+    toast('Até logo!');
+    renderPosts();
+  }
+  function saveUsers() { localStorage.setItem('tc_users', JSON.stringify(users)); }
+
+  // =============================================
+  // HEADER
+  // =============================================
+  function getAvatar(user, size=80) {
+    return user.avatar || `https://i.pravatar.cc/${size}?u=${user.id}`;
+  }
+
+  function updateHeader() {
+    const area = document.getElementById('headerUserArea');
+    if (currentUser) {
+      area.innerHTML = `
+        <img src="${getAvatar(currentUser,80)}"
+             onclick="openProfileModal()"
+             style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.5);cursor:pointer;transition:transform .2s,box-shadow .2s"
+             onmouseover="this.style.transform='scale(1.08)';this.style.boxShadow='0 0 0 3px rgba(255,255,255,.4)'"
+             onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none'"
+             title="Ver perfil"/>
+        <div style="line-height:1.15;cursor:pointer" onclick="openProfileModal()">
+          <div style="color:white;font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem">${escHtml(currentUser.username)}</div>
+          <div style="color:rgba(255,255,255,.55);font-size:.72rem">${escHtml(currentUser.tag)}</div>
+        </div>
+        <button onclick="doLogout()"
+          style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;border-radius:8px;padding:.35rem .65rem;cursor:pointer;font-size:.8rem;transition:background .2s"
+          onmouseover="this.style.background='rgba(255,255,255,.22)'"
+          onmouseout="this.style.background='rgba(255,255,255,.1)'"
+          title="Sair">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>`;
+    } else {
+      area.innerHTML = `
+        <button onclick="openAuthModal('login')"
+          style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28);color:white;border-radius:10px;padding:.4rem .9rem;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;transition:background .2s"
+          onmouseover="this.style.background='rgba(255,255,255,.2)'"
+          onmouseout="this.style.background='rgba(255,255,255,.1)'">Entrar</button>
+        <button onclick="openAuthModal('register')"
+          style="background:white;border:none;color:#4f46e5;border-radius:10px;padding:.4rem .9rem;cursor:pointer;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;transition:opacity .2s"
+          onmouseover="this.style.opacity='.85'"
+          onmouseout="this.style.opacity='1'">Criar Conta</button>`;
+    }
+  }
+
+  // =============================================
+  // PROFILE MODAL
+  // =============================================
+  let pendingAvatarDataUrl = null;
+
+  function openProfileModal() {
+    if (!currentUser) { openAuthModal('login'); return; }
+    pendingAvatarDataUrl = null;
+
+    // fill preview
+    document.getElementById('profileAvatarPreview').src = getAvatar(currentUser, 200);
+    document.getElementById('profileDisplayName').textContent = currentUser.username;
+    document.getElementById('profileDisplayTag').textContent  = currentUser.tag;
+    document.getElementById('editUsername').value = currentUser.username;
+    // tag: strip leading @
+    document.getElementById('editTag').value      = currentUser.tag.replace(/^@/,'');
+    document.getElementById('editEmail').value    = currentUser.email;
+
+    // stats
+    const myPosts    = posts.filter(p=>p.authorId===currentUser.id).length;
+    const myLikes    = posts.reduce((sum,p)=>sum+(p.likedBy.includes(currentUser.id)?1:0),0);
+    const myComments = posts.reduce((sum,p)=>sum+p.comments.filter(c=>c.authorId===currentUser.id).length,0);
+    document.getElementById('statPosts').textContent    = myPosts;
+    document.getElementById('statLikes').textContent    = myLikes;
+    document.getElementById('statComments').textContent = myComments;
+
+    document.getElementById('profileModal').classList.add('open');
+  }
+  function closeProfileModal() {
+    document.getElementById('profileModal').classList.remove('open');
+    document.getElementById('profileAvatarInput').value = '';
+    pendingAvatarDataUrl = null;
+  }
+  document.getElementById('profileModal').addEventListener('click', function(e) { if(e.target===this) closeProfileModal(); });
+
+  function previewAvatar(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const r = new FileReader();
+    r.onload = () => {
+      pendingAvatarDataUrl = r.result;
+      document.getElementById('profileAvatarPreview').src = r.result;
+    };
+    r.readAsDataURL(file);
+  }
+
+  function saveProfile() {
+    const username = document.getElementById('editUsername').value.trim();
+    const rawTag   = document.getElementById('editTag').value.trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+    const email    = document.getElementById('editEmail').value.trim();
+
+    if (!username) { toast('⚠️ Nome não pode ser vazio.'); return; }
+    if (!rawTag)   { toast('⚠️ Tag inválida.'); return; }
+    if (!email)    { toast('⚠️ Email não pode ser vazio.'); return; }
+
+    // check email uniqueness (ignore self)
+    if (users.find(u=>u.email===email && u.id!==currentUser.id)) {
+      toast('⚠️ Este email já está em uso.'); return;
+    }
+
+    const newTag = `@${rawTag}`;
+    const oldUsername = currentUser.username;
+    const oldTag      = currentUser.tag;
+
+    // update user object
+    currentUser.username = username;
+    currentUser.tag      = newTag;
+    currentUser.email    = email;
+    if (pendingAvatarDataUrl) currentUser.avatar = pendingAvatarDataUrl;
+
+    // update in array
+    const idx = users.findIndex(u=>u.id===currentUser.id);
+    if (idx>-1) users[idx] = currentUser;
+    saveUsers();
+
+    // update posts + comments authored by this user
+    posts.forEach(p => {
+      if (p.authorId===currentUser.id) { p.author=username; p.authorTag=newTag; }
+      p.comments.forEach(c => {
+        if (c.authorId===currentUser.id) { c.author=username; c.authorTag=newTag; }
+      });
+    });
+
+    // refresh UI
+    document.getElementById('profileDisplayName').textContent = username;
+    document.getElementById('profileDisplayTag').textContent  = newTag;
+    updateHeader();
+    renderPosts();
+    toast('✅ Perfil atualizado!');
+    closeProfileModal();
+  }
+
+  // =============================================
+  // FILE LABEL
+  // =============================================
+  function updateFileLabel(input) {
+    document.getElementById('fileLabelText').textContent =
+      input.files[0] ? input.files[0].name : 'Adicionar imagem';
+  }
+
+  // =============================================
+  // CREATE POST
+  // =============================================
+  function doCreatePost() {
+    const title     = document.getElementById('postTitle').value.trim();
+    const desc      = document.getElementById('postDesc').value.trim();
+    const imageFile = document.getElementById('postImage').files[0];
+    if (!title&&!desc&&!imageFile) { toast('⚠️ Adicione algum conteúdo.'); return; }
+    const finalize = (imageUrl) => {
+      posts.unshift({
+        id: Date.now(),
+        author:    currentUser ? currentUser.username : 'Visitante',
+        authorTag: currentUser ? currentUser.tag      : '@guest',
+        authorId:  currentUser ? currentUser.id       : null,
+        title, desc, image: imageUrl,
+        likes: 0, likedBy: [], comments: []
+      });
+      renderPosts();
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postDesc').value  = '';
+      document.getElementById('postImage').value = '';
+      document.getElementById('fileLabelText').textContent = 'Adicionar imagem';
+      toast('✅ Publicado!');
+    };
+    if (imageFile) { const r=new FileReader(); r.onload=()=>finalize(r.result); r.readAsDataURL(imageFile); }
+    else finalize('');
+  }
+
+  // =============================================
+  // LIKE
+  // =============================================
+  function likePost(id) {
+    if (!currentUser) { toast('🔒 Faça login para curtir.'); openAuthModal('login'); return; }
+    const post = posts.find(p=>p.id===id);
+    if (!post) return;
+    const idx = post.likedBy.indexOf(currentUser.id);
+    if (idx>-1) { post.likes--; post.likedBy.splice(idx,1); }
+    else        { post.likes++; post.likedBy.push(currentUser.id); }
+    renderPosts();
+  }
+
+  // =============================================
+  // COMMENT
+  // =============================================
+  function addComment(postId) {
+    const textarea   = document.getElementById(`comment-${postId}`);
+    const imageInput = document.getElementById(`comment-img-${postId}`);
+    const text       = textarea.value.trim();
+    const imageFile  = imageInput ? imageInput.files[0] : null;
+    if (!text&&!imageFile) { toast('⚠️ Escreva algo para comentar.'); return; }
+    const finalize = (imageUrl) => {
+      const post = posts.find(p=>p.id===postId);
+      if (!post) return;
+      post.comments.push({
+        id: Date.now(),
+        author:    currentUser ? currentUser.username : 'Visitante',
+        authorTag: currentUser ? currentUser.tag      : '@guest',
+        authorId:  currentUser ? currentUser.id       : null,
+        text, image: imageUrl
+      });
+      renderPosts();
+    };
+    if (imageFile) { const r=new FileReader(); r.onload=()=>finalize(r.result); r.readAsDataURL(imageFile); }
+    else finalize('');
+  }
+
+  // =============================================
+  // RENDER
+  // =============================================
+  function isDark() { return document.documentElement.getAttribute('data-theme')==='dark'; }
+
+  function renderPosts() {
+    const container = document.getElementById('postsContainer');
+    const empty     = document.getElementById('emptyMsg');
+    if (posts.length===0) { container.innerHTML=''; empty.style.display=''; return; }
+    empty.style.display = 'none';
+
+    const t2         = isDark() ? '#c4b5fd' : '#374151';
+    const cbg        = isDark() ? 'var(--card-inner)' : '#f8f7ff';
+    const tabg       = isDark() ? 'var(--input-bg)' : (currentUser?'white':'#f1f0fb');
+    const avBorder   = isDark() ? '#2e1f5e' : '#ede9fe';
+
+    container.innerHTML = posts.map(post => {
+      const liked = currentUser && post.likedBy.includes(currentUser.id);
+
+      const postAvatar = (() => {
+        if (post.authorId) {
+          const u = users.find(u=>u.id===post.authorId);
+          if (u && u.avatar) return u.avatar;
+        }
+        return `https://i.pravatar.cc/80?u=${post.authorId||post.id}`;
+      })();
+
+      const commentsHTML = post.comments.map(c => {
+        const cu = c.authorId ? users.find(u=>u.id===c.authorId) : null;
+        const ca = cu && cu.avatar ? cu.avatar : `https://i.pravatar.cc/40?u=${c.authorId||c.id}`;
+        return `
+          <div class="comment-item" style="margin-top:.7rem">
+            <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.35rem">
+              <img src="${ca}" style="width:28px;height:28px;border-radius:50%;object-fit:cover"/>
+              <span style="font-weight:600;font-size:.88rem;color:var(--text)">${escHtml(c.author)}</span>
+              <span class="tag-badge">${escHtml(c.authorTag)}</span>
+            </div>
+            ${c.text  ? `<p style="font-size:.9rem;color:${t2}">${escHtml(c.text)}</p>` : ''}
+            ${c.image ? `<img src="${c.image}" style="margin-top:.5rem;border-radius:10px;max-width:100%;max-height:260px;object-fit:cover"/>` : ''}
+          </div>`;
+      }).join('');
+
+      return `
+        <div class="card">
+          <div style="padding:1.2rem 1.4rem">
+            <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem">
+              <img src="${postAvatar}"
+                   style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid ${avBorder}"/>
+              <div>
+                <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:var(--text)">${escHtml(post.author)}</div>
+                <span class="tag-badge">${escHtml(post.authorTag)}</span>
+              </div>
+            </div>
+            ${post.title ? `<h2 style="font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;margin-bottom:.45rem;color:var(--text)">${escHtml(post.title)}</h2>` : ''}
+            ${post.desc  ? `<p style="color:${t2};font-size:.93rem;line-height:1.65;margin-bottom:.6rem">${escHtml(post.desc)}</p>` : ''}
+          </div>
+
+          ${post.image ? `<img src="${post.image}" style="width:100%;max-height:500px;object-fit:cover"/>` : ''}
+
+          <div style="padding:1rem 1.4rem;border-top:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem">
+              <button class="like-btn ${liked?'liked':''}" onclick="likePost(${post.id})">
+                <i class="fa-${liked?'solid':'regular'} fa-heart"></i>
+                <span>${post.likes}</span>
+              </button>
+              <span style="color:var(--muted);font-size:.88rem">
+                <i class="fa-regular fa-comment" style="margin-right:.3rem"></i>${post.comments.length}
+              </span>
+            </div>
+
+            <div style="background:${cbg};border-radius:14px;padding:.95rem;border:1px solid var(--border)">
+              <textarea id="comment-${post.id}"
+                placeholder="${currentUser?'Escreva um comentário...':'Faça login para comentar...'}"
+                ${currentUser?'':'disabled'}
+                style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:.6rem .85rem;font-family:'DM Sans',sans-serif;font-size:.88rem;resize:none;background:${currentUser?tabg:'var(--card-inner)'};color:var(--text);outline:none;margin-bottom:.55rem;transition:background .4s,color .4s,border-color .2s"
+                rows="2"></textarea>
+              <div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap">
+                <label style="cursor:pointer;font-size:.8rem;color:var(--accent);display:flex;align-items:center;gap:.3rem">
+                  <i class="fa-solid fa-image"></i>
+                  <input type="file" id="comment-img-${post.id}" accept="image/*" style="display:none"/>
+                  Imagem
+                </label>
+                <button onclick="${currentUser?`addComment(${post.id})`:`openAuthModal('login')`}"
+                  class="btn-primary" style="padding:.42rem .95rem;font-size:.83rem">Comentar</button>
+              </div>
+            </div>
+
+            ${commentsHTML ? `<div style="margin-top:.7rem">${commentsHTML}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // =============================================
+  // UTIL
+  // =============================================
+  function escHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // =============================================
+  // INIT
+  // =============================================
+  updateHeader();
+  renderPosts();
+</script>
+</body>
+</html>
